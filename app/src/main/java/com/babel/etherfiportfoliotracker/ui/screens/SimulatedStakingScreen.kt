@@ -19,23 +19,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,8 +48,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.babel.etherfiportfoliotracker.R
 import com.babel.etherfiportfoliotracker.ui.viewmodels.SimulatedStakingViewModel
 import java.text.NumberFormat
@@ -479,24 +470,21 @@ private fun SectionLabel(
 }
 
 // ============================================================================
-// MAIN SCREEN
+// MAIN CONTENT
 // ============================================================================
 
 /**
- * Simulated staking screen that shows real balances but doesn't perform actual staking.
+ * Staking content that shows real balances but doesn't perform actual staking.
  * Emulates the EtherFi staking interface.
  *
- * @param address The wallet address to load balances for (from navigation)
- * @param navController Navigation controller for navigation
+ * @param address The wallet address to load balances for
+ * @param viewModel ViewModel for managing staking state
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimulatedStakingScreen(
+fun StakingContent(
     address: String,
-    navController: NavController
+    viewModel: SimulatedStakingViewModel
 ) {
-    val viewModel: SimulatedStakingViewModel = hiltViewModel()
-
     // State
     var isStaking by remember { mutableStateOf(true) }
     var stakeAmount by remember { mutableStateOf("") }
@@ -510,149 +498,128 @@ fun SimulatedStakingScreen(
     // Formatter
     val numberFormatter = createNumberFormatter()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Staking", color = LavenderText) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = LavenderText
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = VioletDarkBackground
-                )
-            )
-        },
-        containerColor = VioletDarkBackground
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(StakingSpacing.Medium)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VioletDarkBackground)
+            .verticalScroll(rememberScrollState())
+            .padding(StakingSpacing.Medium)
+    ) {
+        // Main staking card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = VioletCardBackground
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            // Main staking card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = VioletCardBackground
-                ),
-                shape = RoundedCornerShape(16.dp)
+            Column(
+                modifier = Modifier.padding(StakingSpacing.CardPadding)
             ) {
-                Column(
-                    modifier = Modifier.padding(StakingSpacing.CardPadding)
+                // Header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(VioletDarkBackground, RoundedCornerShape(12.dp))
+                        .padding(StakingSpacing.Medium),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Header
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
-                            .padding(StakingSpacing.Medium),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (isStaking) "Stake on Ethereum" else "Unstake eETH",
-                            color = LavenderText,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(StakingSpacing.Large))
-
-                    // Stake/Unstake section
-                    SectionLabel(text = if (isStaking) "Stake" else "Unstake")
-                    Spacer(modifier = Modifier.height(StakingSpacing.Small))
-
-                    // Input box
-                    TokenInputBox(
-                        value = stakeAmount,
-                        onValueChange = { stakeAmount = limitToMaxDigits(it) },
-                        tokenSymbol = if (isStaking) "ETH" else "eETH",
-                        balance = if (isStaking) ethBalance else eethBalance,
-                        isLoading = isLoading,
-                        onMaxClick = {
-                            stakeAmount = if (isStaking) {
-                                formatToMaxDigits(ethBalance)
-                            } else {
-                                formatToMaxDigits(eethBalance)
-                            }
-                        },
-                        numberFormatter = numberFormatter
+                    Text(
+                        text = if (isStaking) "Stake on Ethereum" else "Unstake eETH",
+                        color = LavenderText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(StakingSpacing.Large))
+                Spacer(modifier = Modifier.height(StakingSpacing.Large))
 
-                    // Swap icon
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        SwapIcon(onClick = { isStaking = !isStaking })
-                    }
+                // Stake/Unstake section
+                SectionLabel(text = if (isStaking) "Stake" else "Unstake")
+                Spacer(modifier = Modifier.height(StakingSpacing.Small))
 
-                    // Receive section
-                    SectionLabel(text = "Receive")
-                    Spacer(modifier = Modifier.height(StakingSpacing.Small))
+                // Input box
+                TokenInputBox(
+                    value = stakeAmount,
+                    onValueChange = { stakeAmount = limitToMaxDigits(it) },
+                    tokenSymbol = if (isStaking) "ETH" else "eETH",
+                    balance = if (isStaking) ethBalance else eethBalance,
+                    isLoading = isLoading,
+                    onMaxClick = {
+                        stakeAmount = if (isStaking) {
+                            formatToMaxDigits(ethBalance)
+                        } else {
+                            formatToMaxDigits(eethBalance)
+                        }
+                    },
+                    numberFormatter = numberFormatter
+                )
 
-                    // Receive display box
-                    TokenDisplayBox(
-                        value = stakeAmount,
-                        tokenSymbol = if (isStaking) "eETH" else "ETH",
-                        balance = if (isStaking) eethBalance else ethBalance,
-                        numberFormatter = numberFormatter
+                Spacer(modifier = Modifier.height(StakingSpacing.Large))
+
+                // Swap icon
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SwapIcon(onClick = { isStaking = !isStaking })
+                }
+
+                // Receive section
+                SectionLabel(text = "Receive")
+                Spacer(modifier = Modifier.height(StakingSpacing.Small))
+
+                // Receive display box
+                TokenDisplayBox(
+                    value = stakeAmount,
+                    tokenSymbol = if (isStaking) "eETH" else "ETH",
+                    balance = if (isStaking) eethBalance else ethBalance,
+                    numberFormatter = numberFormatter
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Exchange rate
+                ExchangeRateRow()
+
+                Spacer(modifier = Modifier.height(StakingSpacing.Large))
+
+                // Action button
+                Button(
+                    onClick = { /* Non-functional - demo only */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(StakingSpacing.ButtonHeight),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LavenderAccent,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = if (isStaking) "Stake" else "Unstake",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Exchange rate
-                    ExchangeRateRow()
-
-                    Spacer(modifier = Modifier.height(StakingSpacing.Large))
-
-                    // Action button
-                    Button(
-                        onClick = { /* Non-functional - demo only */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(StakingSpacing.ButtonHeight),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LavenderAccent,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = if (isStaking) "Stake" else "Unstake",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(StakingSpacing.Medium))
+        Spacer(modifier = Modifier.height(StakingSpacing.Medium))
 
-            // Disclaimer
-            StakingDisclaimerCard()
+        // Disclaimer
+        StakingDisclaimerCard()
 
-            // Error message
-            errorMessage?.let { error ->
-                Spacer(modifier = Modifier.height(StakingSpacing.Small))
-                Text(
-                    text = error,
-                    color = ErrorColor,
-                    fontSize = 14.sp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        // Error message
+        errorMessage?.let { error ->
+            Spacer(modifier = Modifier.height(StakingSpacing.Small))
+            Text(
+                text = error,
+                color = ErrorColor,
+                fontSize = 14.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

@@ -57,7 +57,11 @@ android {
 }
 
 dependencies {
-    // Existing dependencies
+    // Material Icons Extended (for additional icons)
+    implementation("androidx.compose.material:material-icons-extended:1.7.6")
+
+    // Foundation for HorizontalPager
+    implementation("androidx.compose.foundation:foundation:1.7.6")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -8,10 +8,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.babel.etherfiportfoliotracker.ui.screens.AddAddressScreen
 import com.babel.etherfiportfoliotracker.ui.screens.AddressListScreen
-import com.babel.etherfiportfoliotracker.ui.screens.PortfolioDetailScreen
 import com.babel.etherfiportfoliotracker.ui.screens.SimulatedCardScreen
-import com.babel.etherfiportfoliotracker.ui.screens.SimulatedStakingScreen
-import com.babel.etherfiportfoliotracker.ui.screens.SimulatedWrapScreen
+import com.babel.etherfiportfoliotracker.ui.screens.WalletMainScreen
 
 /**
  * Main navigation graph for the app.
@@ -35,9 +33,9 @@ fun AppNavigation() {
             AddAddressScreen(navController = navController)
         }
 
-        // Portfolio Detail Screen (with address argument)
+        // Wallet Main Screen (with address argument)
         composable(
-            route = AppRoutes.PortfolioDetail.route,
+            route = AppRoutes.WalletMain.route,
             arguments = listOf(
                 navArgument("address") {
                     type = NavType.StringType
@@ -45,39 +43,7 @@ fun AppNavigation() {
             )
         ) { backStackEntry ->
             val address = backStackEntry.arguments?.getString("address") ?: ""
-            PortfolioDetailScreen(
-                address = address,
-                navController = navController
-            )
-        }
-
-        // Simulated Staking Screen (with address argument)
-        composable(
-            route = AppRoutes.SimulatedStaking.route,
-            arguments = listOf(
-                navArgument("address") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            val address = backStackEntry.arguments?.getString("address") ?: ""
-            SimulatedStakingScreen(
-                address = address,
-                navController = navController
-            )
-        }
-
-        // Simulated Wrap Screen (with address argument)
-        composable(
-            route = AppRoutes.SimulatedWrap.route,
-            arguments = listOf(
-                navArgument("address") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            val address = backStackEntry.arguments?.getString("address") ?: ""
-            SimulatedWrapScreen(
+            WalletMainScreen(
                 address = address,
                 navController = navController
             )

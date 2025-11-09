@@ -19,31 +19,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,8 +48,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.babel.etherfiportfoliotracker.R
 import com.babel.etherfiportfoliotracker.ui.viewmodels.SimulatedWrapViewModel
 import java.text.NumberFormat
@@ -85,8 +71,6 @@ private object WrapConstants {
     const val MAX_DIGITS = 16
     const val DISPLAY_DIGITS = 12
     const val DECIMAL_PLACES = 4
-    val TAB_TITLES = listOf("Stake", "Wrap", "Bridge")
-    const val WRAP_TAB_INDEX = 1
 }
 
 private object WrapSpacing {
@@ -105,7 +89,6 @@ private object WrapAlpha {
     const val Light = 0.5f
     const val VeryLight = 0.3f
     const val Divider = 0.15f
-    const val TabInactive = 0.6f
     const val ButtonDisabled = 0.3f
     const val SwapBorder = 0.4f
 }
@@ -488,53 +471,6 @@ private fun WrapDisclaimerCard(modifier: Modifier = Modifier) {
 }
 
 /**
- * Tab row for navigation between Stake, Wrap, and Bridge sections
- */
-@Composable
-private fun WrapTabRow(
-    selectedTabIndex: Int,
-    tabs: List<String>,
-    modifier: Modifier = Modifier
-) {
-    TabRow(
-        selectedTabIndex = selectedTabIndex,
-        containerColor = VioletCardBackground,
-        contentColor = LavenderText,
-        indicator = { tabPositions ->
-            TabRowDefaults.SecondaryIndicator(
-                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                color = LavenderAccent
-            )
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .background(VioletCardBackground, RoundedCornerShape(12.dp))
-    ) {
-        tabs.forEachIndexed { index, title ->
-            Tab(
-                selected = selectedTabIndex == index,
-                onClick = { /* Demo only - no navigation */ },
-                text = {
-                    Text(
-                        text = title,
-                        color = if (selectedTabIndex == index) {
-                            LavenderText
-                        } else {
-                            LavenderText.copy(alpha = WrapAlpha.TabInactive)
-                        },
-                        fontWeight = if (selectedTabIndex == index) {
-                            FontWeight.Bold
-                        } else {
-                            FontWeight.Normal
-                        }
-                    )
-                }
-            )
-        }
-    }
-}
-
-/**
  * Header section with centered title
  */
 @Composable
@@ -560,26 +496,22 @@ private fun SectionHeader(
 }
 
 // ============================================================================
-// MAIN SCREEN
+// MAIN CONTENT
 // ============================================================================
 
 /**
- * Simulated wrap screen that shows real eETH and weETH balances
+ * Wrap content that shows real eETH and weETH balances
  * but doesn't perform actual wrapping operations.
  *
- * @param address The wallet address to load balances for (from navigation)
- * @param navController Navigation controller for navigation
+ * @param address The wallet address to load balances for
  * @param viewModel ViewModel for managing wrap screen state
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimulatedWrapScreen(
+fun WrapContent(
     address: String,
-    navController: NavController,
-    viewModel: SimulatedWrapViewModel = hiltViewModel()
+    viewModel: SimulatedWrapViewModel
 ) {
     // State
-    var selectedTabIndex by remember { mutableIntStateOf(WrapConstants.WRAP_TAB_INDEX) }
     var isWrapping by remember { mutableStateOf(true) }
     var wrapAmount by remember { mutableStateOf("") }
 
@@ -592,146 +524,117 @@ fun SimulatedWrapScreen(
     // Formatter
     val numberFormatter = createNumberFormatter()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Wrap", color = LavenderText) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = LavenderText
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = VioletDarkBackground
-                )
-            )
-        },
-        containerColor = VioletDarkBackground
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(WrapSpacing.Medium)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VioletDarkBackground)
+            .verticalScroll(rememberScrollState())
+            .padding(WrapSpacing.Medium)
+    ) {
+        // Main wrap card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = VioletCardBackground
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            // Tabs
-            WrapTabRow(
-                selectedTabIndex = selectedTabIndex,
-                tabs = WrapConstants.TAB_TITLES
-            )
-
-            Spacer(modifier = Modifier.height(WrapSpacing.Large))
-
-            // Main wrap card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = VioletCardBackground
-                ),
-                shape = RoundedCornerShape(16.dp)
+            Column(
+                modifier = Modifier.padding(WrapSpacing.CardPadding)
             ) {
-                Column(
-                    modifier = Modifier.padding(WrapSpacing.CardPadding)
+                // Header
+                SectionHeader(title = "Wrap on Ethereum")
+
+                Spacer(modifier = Modifier.height(WrapSpacing.Large))
+
+                // Wrap/Unwrap section
+                SectionLabel(text = if (isWrapping) "Wrap" else "Unwrap")
+                Spacer(modifier = Modifier.height(WrapSpacing.Small))
+
+                // Input box
+                TokenInputBox(
+                    value = wrapAmount,
+                    onValueChange = { wrapAmount = limitToMaxDigits(it) },
+                    tokenSymbol = if (isWrapping) "eETH" else "weETH",
+                    balance = if (isWrapping) eethBalance else weethBalance,
+                    isLoading = isLoading,
+                    onMaxClick = {
+                        wrapAmount = if (isWrapping) {
+                            formatToMaxDigits(eethBalance)
+                        } else {
+                            formatToMaxDigits(weethBalance)
+                        }
+                    },
+                    numberFormatter = numberFormatter
+                )
+
+                Spacer(modifier = Modifier.height(WrapSpacing.Large))
+
+                // Swap icon
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Header
-                    SectionHeader(title = "Wrap on Ethereum")
+                    SwapIcon(onClick = { isWrapping = !isWrapping })
+                }
 
-                    Spacer(modifier = Modifier.height(WrapSpacing.Large))
+                // Receive section
+                SectionLabel(text = "Receive")
+                Spacer(modifier = Modifier.height(WrapSpacing.Small))
 
-                    // Wrap/Unwrap section
-                    SectionLabel(text = if (isWrapping) "Wrap" else "Unwrap")
-                    Spacer(modifier = Modifier.height(WrapSpacing.Small))
+                // Receive display box
+                TokenDisplayBox(
+                    value = wrapAmount,
+                    tokenSymbol = if (isWrapping) "weETH" else "eETH",
+                    balance = if (isWrapping) weethBalance else eethBalance,
+                    numberFormatter = numberFormatter
+                )
 
-                    // Input box
-                    TokenInputBox(
-                        value = wrapAmount,
-                        onValueChange = { wrapAmount = limitToMaxDigits(it) },
-                        tokenSymbol = if (isWrapping) "eETH" else "weETH",
-                        balance = if (isWrapping) eethBalance else weethBalance,
-                        isLoading = isLoading,
-                        onMaxClick = {
-                            wrapAmount = if (isWrapping) {
-                                formatToMaxDigits(eethBalance)
-                            } else {
-                                formatToMaxDigits(weethBalance)
-                            }
-                        },
-                        numberFormatter = numberFormatter
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Exchange rate
+                ExchangeRateRow(isWrapping = isWrapping)
+
+                Spacer(modifier = Modifier.height(WrapSpacing.Large))
+
+                // Action button (disabled)
+                Button(
+                    onClick = { /* Non-functional - demo only */ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(WrapSpacing.ButtonHeight),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
+                        contentColor = LavenderText.copy(alpha = WrapAlpha.Light),
+                        disabledContainerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
+                        disabledContentColor = LavenderText.copy(alpha = WrapAlpha.Light)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = false
+                ) {
+                    Text(
+                        text = "Enter an amount",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.height(WrapSpacing.Large))
-
-                    // Swap icon
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        SwapIcon(onClick = { isWrapping = !isWrapping })
-                    }
-
-
-                    // Receive section
-                    SectionLabel(text = "Receive")
-                    Spacer(modifier = Modifier.height(WrapSpacing.Small))
-
-                    // Receive display box
-                    TokenDisplayBox(
-                        value = wrapAmount,
-                        tokenSymbol = if (isWrapping) "weETH" else "eETH",
-                        balance = if (isWrapping) weethBalance else eethBalance,
-                        numberFormatter = numberFormatter
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Exchange rate
-                    ExchangeRateRow(isWrapping = isWrapping)
-
-                    Spacer(modifier = Modifier.height(WrapSpacing.Large))
-
-                    // Action button (disabled)
-                    Button(
-                        onClick = { /* Non-functional - demo only */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(WrapSpacing.ButtonHeight),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
-                            contentColor = LavenderText.copy(alpha = WrapAlpha.Light),
-                            disabledContainerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
-                            disabledContentColor = LavenderText.copy(alpha = WrapAlpha.Light)
-                        ),
-                        shape = RoundedCornerShape(12.dp),
-                        enabled = false
-                    ) {
-                        Text(
-                            text = "Enter an amount",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 }
             }
+        }
 
-            Spacer(modifier = Modifier.height(WrapSpacing.Medium))
+        Spacer(modifier = Modifier.height(WrapSpacing.Medium))
 
-            // Disclaimer
-            WrapDisclaimerCard()
+        // Disclaimer
+        WrapDisclaimerCard()
 
-            // Error message
-            errorMessage?.let { error ->
-                Spacer(modifier = Modifier.height(WrapSpacing.Small))
-                Text(
-                    text = error,
-                    color = ErrorColor,
-                    fontSize = 14.sp,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        // Error message
+        errorMessage?.let { error ->
+            Spacer(modifier = Modifier.height(WrapSpacing.Small))
+            Text(
+                text = error,
+                color = ErrorColor,
+                fontSize = 14.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
