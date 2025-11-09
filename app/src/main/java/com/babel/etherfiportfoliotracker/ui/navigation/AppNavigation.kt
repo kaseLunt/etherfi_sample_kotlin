@@ -10,6 +10,7 @@ import com.babel.etherfiportfoliotracker.ui.screens.AddAddressScreen
 import com.babel.etherfiportfoliotracker.ui.screens.AddressListScreen
 import com.babel.etherfiportfoliotracker.ui.screens.SimulatedCardScreen
 import com.babel.etherfiportfoliotracker.ui.screens.WalletMainScreen
+import java.net.URLDecoder
 
 /**
  * Main navigation graph for the app.
@@ -33,18 +34,25 @@ fun AppNavigation() {
             AddAddressScreen(navController = navController)
         }
 
-        // Wallet Main Screen (with address argument)
+        // Wallet Main Screen (with address and nickname arguments)
         composable(
             route = AppRoutes.WalletMain.route,
             arguments = listOf(
                 navArgument("address") {
                     type = NavType.StringType
+                },
+                navArgument("nickname") {
+                    type = NavType.StringType
                 }
             )
         ) { backStackEntry ->
             val address = backStackEntry.arguments?.getString("address") ?: ""
+            val encodedNickname = backStackEntry.arguments?.getString("nickname") ?: ""
+            val nickname = URLDecoder.decode(encodedNickname, "UTF-8")
+
             WalletMainScreen(
                 address = address,
+                nickname = nickname,
                 navController = navController
             )
         }

@@ -1,5 +1,7 @@
 package com.babel.etherfiportfoliotracker.ui.screens
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,6 +45,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -57,19 +60,34 @@ import java.util.Locale
 // COLORS
 // ============================================================================
 
-private val VioletDarkBackground = Color(0xFF100A30)
-private val VioletCardBackground = Color(0xFF1A0F42)
+private val ScreenBackground = Color(0xFF1A1637)      // Screen edges (outside card)
+private val CardBackground = Color(0xFF100A30)        // Card background (outside boxes)
+private val HeaderBackground = Color(0xFF1A163A)      // Inside header
+private val BoxBorderColor = Color(0xFF302659)        // Border for input/display boxes
+private val VioletCardBackground = Color(0xFF1A0F42)  // Kept for disclaimer card
 private val LavenderText = Color(0xFFB8A9E8)
 private val LavenderAccent = Color(0xFF8B7BC8)
 private val ErrorColor = Color(0xFFCF6679)
+
+// Gradient colors for button
+private val GradientStart = Color(0xFF29BCFA)
+private val GradientMiddle = Color(0xFF6464E4)
+private val GradientEnd = Color(0xFFB45AFA)
+
+// Input box gradient colors
+private val InputGradientStart = Color(0xFF9F62F2)    // rgba(159, 98, 242, ...)
+private val InputGradientEnd = Color(0xFF5FEDEB)      // rgba(95, 237, 235, ...)
+
+// Arrow/accent color
+private val PurpleArrow = Color(0xFFBA86FC)
 
 // ============================================================================
 // CONSTANTS
 // ============================================================================
 
 private object StakingConstants {
-    const val MAX_DIGITS = 14
-    const val DISPLAY_DIGITS = 12
+    const val MAX_DIGITS = 11
+    const val DISPLAY_DIGITS = 11
     const val DECIMAL_PLACES = 4
     const val EXCHANGE_RATE = "1 ETH = 1.0 eETH"
 }
@@ -90,6 +108,7 @@ private object StakingAlpha {
     const val Light = 0.5f
     const val VeryLight = 0.3f
     const val Divider = 0.15f
+    const val SwapBorder = 0.4f
 }
 
 // ============================================================================
@@ -149,9 +168,79 @@ private fun createNumberFormatter(
     maximumFractionDigits = maxDecimals
 }
 
+/**
+ * Creates the button gradient brush
+ */
+private fun createGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            0.1423f to GradientStart,
+            0.4515f to GradientMiddle,
+            0.8614f to GradientEnd
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.36f)
+    )
+}
+
+/**
+ * Creates the input box gradient brush
+ * linear-gradient(91deg, rgba(159, 98, 242, 0.16) -4%, rgba(95, 237, 235, 0) 120.34%)
+ */
+private fun createInputBoxGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            -0.04f to InputGradientStart.copy(alpha = 0.16f),
+            1.2034f to InputGradientEnd.copy(alpha = 0f)
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.0175f)
+    )
+}
+
+/**
+ * Creates the divider gradient brush
+ * linear-gradient(91deg, rgba(159, 98, 242, 0.45) -4%, rgba(95, 237, 235, 0) 120.34%)
+ */
+private fun createDividerGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            -0.04f to InputGradientStart.copy(alpha = 0.45f),
+            1.2034f to InputGradientEnd.copy(alpha = 0f)
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, 0f)
+    )
+}
+
+/**
+ * Validates if the stake amount is valid
+ */
+private fun isValidStakeAmount(amount: String, maxBalance: Double): Boolean {
+    if (amount.isEmpty() || amount == "0" || amount == ".") return false
+
+    val value = amount.toDoubleOrNull() ?: return false
+    return value > 0 && value <= maxBalance
+}
+
 // ============================================================================
 // COMPOSABLE COMPONENTS
 // ============================================================================
+
+/**
+ * Gradient divider line for token boxes
+ */
+@Composable
+private fun GradientDivider(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(brush = createDividerGradientBrush())
+    )
+}
 
 /**
  * Token input box with editable value, MAX button, and balance display
@@ -165,16 +254,25 @@ private fun TokenInputBox(
     isLoading: Boolean,
     onMaxClick: () -> Unit,
     modifier: Modifier = Modifier,
-    numberFormatter: NumberFormat = createNumberFormatter()
+    numberFormatter: NumberFormat = createNumberFormatter(),
+    iconRes: Int? = null
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = BoxBorderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                brush = createInputBoxGradientBrush(),
+                shape = RoundedCornerShape(12.dp)
+            )
             .padding(StakingSpacing.Medium)
     ) {
         Column {
-            // Upper row - Value input, MAX button, Token name
+            // Upper row - Value input, MAX button, Token name with icon
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -219,21 +317,30 @@ private fun TokenInputBox(
                     )
                 }
 
-                // Token symbol
-                Text(
-                    text = tokenSymbol,
-                    color = LavenderText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                // Token symbol with optional icon
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    iconRes?.let {
+                        Icon(
+                            painter = painterResource(id = it),
+                            contentDescription = tokenSymbol,
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                    Text(
+                        text = tokenSymbol,
+                        color = LavenderText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            // Divider
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = LavenderText.copy(alpha = StakingAlpha.Divider)
-            )
+            // Gradient Divider
+            GradientDivider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Lower row - USD value and Balance
             Row(
@@ -278,12 +385,21 @@ private fun TokenDisplayBox(
     tokenSymbol: String,
     balance: Double,
     modifier: Modifier = Modifier,
-    numberFormatter: NumberFormat = createNumberFormatter()
+    numberFormatter: NumberFormat = createNumberFormatter(),
+    iconRes: Int? = null
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = BoxBorderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                brush = createInputBoxGradientBrush(),
+                shape = RoundedCornerShape(12.dp)
+            )
             .padding(StakingSpacing.Medium)
     ) {
         Column {
@@ -309,21 +425,30 @@ private fun TokenDisplayBox(
                     fontWeight = FontWeight.Normal
                 )
 
-                // Token symbol
-                Text(
-                    text = tokenSymbol,
-                    color = LavenderText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                // Token symbol with optional icon
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    iconRes?.let {
+                        Icon(
+                            painter = painterResource(id = it),
+                            contentDescription = tokenSymbol,
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                    Text(
+                        text = tokenSymbol,
+                        color = LavenderText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            // Divider
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = LavenderText.copy(alpha = StakingAlpha.Divider)
-            )
+            // Gradient Divider
+            GradientDivider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Lower row - USD value and Balance
             Row(
@@ -365,13 +490,13 @@ private fun SwapIcon(
         modifier = modifier
             .size(StakingSpacing.SwapIconSize)
             .clip(CircleShape)
-            .background(VioletDarkBackground)
+            .background(CardBackground)
             .border(
                 width = 1.5.dp,
                 color = if (isHovered) {
                     LavenderAccent.copy(alpha = StakingAlpha.Medium)
                 } else {
-                    LavenderAccent.copy(alpha = 0.4f)
+                    LavenderAccent.copy(alpha = StakingAlpha.SwapBorder)
                 },
                 shape = CircleShape
             )
@@ -501,7 +626,7 @@ fun StakingContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(VioletDarkBackground)
+            .background(ScreenBackground)
             .verticalScroll(rememberScrollState())
             .padding(StakingSpacing.Medium)
     ) {
@@ -509,7 +634,7 @@ fun StakingContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = VioletCardBackground
+                containerColor = CardBackground
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -520,17 +645,47 @@ fun StakingContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(VioletDarkBackground, RoundedCornerShape(12.dp))
-                        .padding(StakingSpacing.Medium),
+                        .border(
+                            width = 0.35.dp,
+                            brush = createGradientBrush(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .background(HeaderBackground, RoundedCornerShape(12.dp))
+                        .padding(StakingSpacing.Small),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = if (isStaking) "Stake on Ethereum" else "Unstake eETH",
-                        color = LavenderText,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    if (isStaking) {
+                        Text(
+                            text = "Stake on ",
+                            color = PurpleArrow,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_eth_header),
+                            contentDescription = "Ethereum",
+                            modifier = Modifier
+                                .size(36.dp)
+                                .padding(horizontal = 4.dp),
+                            tint = Color.Unspecified
+                        )
+                        Text(
+                            text = "Ethereum",
+                            color = LavenderText,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    } else {
+                        Text(
+                            text = "Unstake eETH",
+                            color = LavenderText,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(StakingSpacing.Large))
@@ -553,7 +708,8 @@ fun StakingContent(
                             formatToMaxDigits(eethBalance)
                         }
                     },
-                    numberFormatter = numberFormatter
+                    numberFormatter = numberFormatter,
+                    iconRes = if (isStaking) R.drawable.ic_eth else R.drawable.ic_eeth
                 )
 
                 Spacer(modifier = Modifier.height(StakingSpacing.Large))
@@ -575,7 +731,8 @@ fun StakingContent(
                     value = stakeAmount,
                     tokenSymbol = if (isStaking) "eETH" else "ETH",
                     balance = if (isStaking) eethBalance else ethBalance,
-                    numberFormatter = numberFormatter
+                    numberFormatter = numberFormatter,
+                    iconRes = if (isStaking) R.drawable.ic_eeth else R.drawable.ic_eth
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -585,22 +742,43 @@ fun StakingContent(
 
                 Spacer(modifier = Modifier.height(StakingSpacing.Large))
 
-                // Action button
-                Button(
-                    onClick = { /* Non-functional - demo only */ },
+                // Action button with gradient background
+                val currentBalance = if (isStaking) ethBalance else eethBalance
+                val isValidAmount = isValidStakeAmount(stakeAmount, currentBalance)
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(StakingSpacing.ButtonHeight),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = LavenderAccent,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+                        .height(StakingSpacing.ButtonHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            brush = if (isValidAmount) {
+                                createGradientBrush()
+                            } else {
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        GradientStart.copy(alpha = 0.3f),
+                                        GradientMiddle.copy(alpha = 0.3f),
+                                        GradientEnd.copy(alpha = 0.3f)
+                                    )
+                                )
+                            }
+                        )
+                        .clickable(enabled = isValidAmount) {
+                            /* Non-functional - demo only */
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (isStaking) "Stake" else "Unstake",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        text = if (isValidAmount) {
+                            if (isStaking) "Stake" else "Unstake"
+                        } else {
+                            "Enter an amount"
+                        },
+                        color = if (isValidAmount) Color.White else Color.White.copy(alpha = 0.5f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.SansSerif
                     )
                 }
             }

@@ -33,12 +33,14 @@ import com.babel.etherfiportfoliotracker.ui.navigation.BottomNavItem
  * Contains a nested NavHost to manage Portfolio, Vault, and Stake/Wrap sections.
  *
  * @param address The wallet address
+ * @param nickname The wallet nickname to display in the top bar
  * @param navController The main app navigation controller (for back navigation)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletMainScreen(
     address: String,
+    nickname: String,
     navController: NavController
 ) {
     // Nested navigation controller for bottom nav
@@ -52,7 +54,7 @@ fun WalletMainScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = address.take(10) + "..." + address.takeLast(8),
+                        text = nickname,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -89,9 +91,9 @@ fun WalletMainScreen(
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            selectedTextColor = Color.White,
-                            indicatorColor = Color(0xFF333333),
+                            selectedIconColor = Color(0xFFD4AF37), // Gold color for selected icon
+                            selectedTextColor = Color(0xFFD4AF37), // Gold color for selected text
+                            indicatorColor = Color.Transparent, // No background indicator
                             unselectedIconColor = Color.Gray,
                             unselectedTextColor = Color.Gray
                         )

@@ -152,7 +152,7 @@ fun AddressListScreen(
                                 .padding(horizontal = 16.dp)
                                 .clickable {
                                     navController.navigate(
-                                        AppRoutes.WalletMain.buildRoute(wallet.address)
+                                        AppRoutes.WalletMain.buildRoute(wallet.address, wallet.nickname)
                                     )
                                 },
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

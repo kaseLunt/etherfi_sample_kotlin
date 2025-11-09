@@ -1,5 +1,8 @@
 package com.babel.etherfiportfoliotracker.ui.screens
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -57,11 +60,26 @@ import java.util.Locale
 // COLORS
 // ============================================================================
 
-private val VioletDarkBackground = Color(0xFF100A30)
-private val VioletCardBackground = Color(0xFF1A0F42)
+private val ScreenBackground = Color(0xFF1A1637)      // Screen edges (outside card)
+private val CardBackground = Color(0xFF100A30)        // Card background (outside boxes)
+private val HeaderBackground = Color(0xFF1A163A)      // Inside header
+private val BoxBorderColor = Color(0xFF302659)        // Border for input/display boxes
+private val VioletCardBackground = Color(0xFF1A0F42)  // Kept for disclaimer card
 private val LavenderText = Color(0xFFB8A9E8)
 private val LavenderAccent = Color(0xFF8B7BC8)
 private val ErrorColor = Color(0xFFCF6679)
+
+// Gradient colors for button
+private val GradientStart = Color(0xFF29BCFA)
+private val GradientMiddle = Color(0xFF6464E4)
+private val GradientEnd = Color(0xFFB45AFA)
+
+// Input box gradient colors
+private val InputGradientStart = Color(0xFF9F62F2)    // rgba(159, 98, 242, ...)
+private val InputGradientEnd = Color(0xFF5FEDEB)      // rgba(95, 237, 235, ...)
+
+// Arrow/accent color
+private val PurpleArrow = Color(0xFFBA86FC)
 
 // ============================================================================
 // CONSTANTS
@@ -150,9 +168,79 @@ private fun createNumberFormatter(
     maximumFractionDigits = maxDecimals
 }
 
+/**
+ * Creates the button gradient brush
+ */
+private fun createGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            0.1423f to GradientStart,
+            0.4515f to GradientMiddle,
+            0.8614f to GradientEnd
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.36f)
+    )
+}
+
+/**
+ * Creates the input box gradient brush
+ * linear-gradient(91deg, rgba(159, 98, 242, 0.16) -4%, rgba(95, 237, 235, 0) 120.34%)
+ */
+private fun createInputBoxGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            -0.04f to InputGradientStart.copy(alpha = 0.16f),
+            1.2034f to InputGradientEnd.copy(alpha = 0f)
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.0175f)
+    )
+}
+
+/**
+ * Creates the divider gradient brush
+ * linear-gradient(91deg, rgba(159, 98, 242, 0.45) -4%, rgba(95, 237, 235, 0) 120.34%)
+ */
+private fun createDividerGradientBrush(): Brush {
+    return Brush.linearGradient(
+        colorStops = arrayOf(
+            -0.04f to InputGradientStart.copy(alpha = 0.45f),
+            1.2034f to InputGradientEnd.copy(alpha = 0f)
+        ),
+        start = Offset(0f, 0f),
+        end = Offset(Float.POSITIVE_INFINITY, 0f)
+    )
+}
+
+/**
+ * Validates if the wrap amount is valid
+ */
+private fun isValidWrapAmount(amount: String, maxBalance: Double): Boolean {
+    if (amount.isEmpty() || amount == "0" || amount == ".") return false
+
+    val value = amount.toDoubleOrNull() ?: return false
+    return value > 0 && value <= maxBalance
+}
+
 // ============================================================================
 // COMPOSABLE COMPONENTS
 // ============================================================================
+
+/**
+ * Gradient divider line for token boxes
+ */
+@Composable
+private fun GradientDivider(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(brush = createDividerGradientBrush())
+    )
+}
 
 /**
  * Token input box with editable value, MAX button, and balance display
@@ -166,12 +254,21 @@ private fun TokenInputBox(
     isLoading: Boolean,
     onMaxClick: () -> Unit,
     modifier: Modifier = Modifier,
-    numberFormatter: NumberFormat = createNumberFormatter()
+    numberFormatter: NumberFormat = createNumberFormatter(),
+    iconRes: Int? = null
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = BoxBorderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                brush = createInputBoxGradientBrush(),
+                shape = RoundedCornerShape(12.dp)
+            )
             .padding(WrapSpacing.Medium)
     ) {
         Column {
@@ -220,21 +317,30 @@ private fun TokenInputBox(
                     )
                 }
 
-                // Token symbol
-                Text(
-                    text = tokenSymbol,
-                    color = LavenderText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                // Token symbol with optional icon
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    iconRes?.let {
+                        Icon(
+                            painter = painterResource(id = it),
+                            contentDescription = tokenSymbol,
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                    Text(
+                        text = tokenSymbol,
+                        color = LavenderText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            // Divider
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = LavenderText.copy(alpha = WrapAlpha.Divider)
-            )
+            // Gradient Divider
+            GradientDivider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Lower row - USD value and Balance
             Row(
@@ -279,12 +385,21 @@ private fun TokenDisplayBox(
     tokenSymbol: String,
     balance: Double,
     modifier: Modifier = Modifier,
-    numberFormatter: NumberFormat = createNumberFormatter()
+    numberFormatter: NumberFormat = createNumberFormatter(),
+    iconRes: Int? = null
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = BoxBorderColor,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(
+                brush = createInputBoxGradientBrush(),
+                shape = RoundedCornerShape(12.dp)
+            )
             .padding(WrapSpacing.Medium)
     ) {
         Column {
@@ -310,21 +425,30 @@ private fun TokenDisplayBox(
                     fontWeight = FontWeight.Normal
                 )
 
-                // Token symbol
-                Text(
-                    text = tokenSymbol,
-                    color = LavenderText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                // Token symbol with optional icon
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    iconRes?.let {
+                        Icon(
+                            painter = painterResource(id = it),
+                            contentDescription = tokenSymbol,
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                    Text(
+                        text = tokenSymbol,
+                        color = LavenderText,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            // Divider
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = LavenderText.copy(alpha = WrapAlpha.Divider)
-            )
+            // Gradient Divider
+            GradientDivider(modifier = Modifier.padding(vertical = 12.dp))
 
             // Lower row - USD value and Balance
             Row(
@@ -366,7 +490,7 @@ private fun SwapIcon(
         modifier = modifier
             .size(WrapSpacing.SwapIconSize)
             .clip(CircleShape)
-            .background(VioletDarkBackground)
+            .background(CardBackground)
             .border(
                 width = 1.5.dp,
                 color = if (isHovered) {
@@ -481,16 +605,37 @@ private fun SectionHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(VioletDarkBackground, RoundedCornerShape(12.dp))
-            .padding(WrapSpacing.Medium),
+            .border(
+                width = 0.35.dp,
+                brush = createGradientBrush(),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .background(HeaderBackground, RoundedCornerShape(12.dp))
+            .padding(WrapSpacing.Small),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = title,
+            text = "Wrap on ",
+            color = PurpleArrow,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal,
+            fontFamily = FontFamily.SansSerif
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.ic_eth_header),
+            contentDescription = "Ethereum",
+            modifier = Modifier
+                .size(36.dp)
+                .padding(horizontal = 4.dp),
+            tint = Color.Unspecified
+        )
+        Text(
+            text = "Ethereum",
             color = LavenderText,
             fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Normal,
+            fontFamily = FontFamily.SansSerif
         )
     }
 }
@@ -527,7 +672,7 @@ fun WrapContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(VioletDarkBackground)
+            .background(ScreenBackground)
             .verticalScroll(rememberScrollState())
             .padding(WrapSpacing.Medium)
     ) {
@@ -535,7 +680,7 @@ fun WrapContent(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = VioletCardBackground
+                containerColor = CardBackground
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -565,7 +710,8 @@ fun WrapContent(
                             formatToMaxDigits(weethBalance)
                         }
                     },
-                    numberFormatter = numberFormatter
+                    numberFormatter = numberFormatter,
+                    iconRes = if (isWrapping) R.drawable.ic_eeth else R.drawable.ic_weeth
                 )
 
                 Spacer(modifier = Modifier.height(WrapSpacing.Large))
@@ -587,7 +733,8 @@ fun WrapContent(
                     value = wrapAmount,
                     tokenSymbol = if (isWrapping) "weETH" else "eETH",
                     balance = if (isWrapping) weethBalance else eethBalance,
-                    numberFormatter = numberFormatter
+                    numberFormatter = numberFormatter,
+                    iconRes = if (isWrapping) R.drawable.ic_weeth else R.drawable.ic_eeth
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -597,25 +744,43 @@ fun WrapContent(
 
                 Spacer(modifier = Modifier.height(WrapSpacing.Large))
 
-                // Action button (disabled)
-                Button(
-                    onClick = { /* Non-functional - demo only */ },
+                // Action button with gradient and validation
+                val currentBalance = if (isWrapping) eethBalance else weethBalance
+                val isValidAmount = isValidWrapAmount(wrapAmount, currentBalance)
+
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(WrapSpacing.ButtonHeight),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
-                        contentColor = LavenderText.copy(alpha = WrapAlpha.Light),
-                        disabledContainerColor = LavenderAccent.copy(alpha = WrapAlpha.ButtonDisabled),
-                        disabledContentColor = LavenderText.copy(alpha = WrapAlpha.Light)
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = false
+                        .height(WrapSpacing.ButtonHeight)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            brush = if (isValidAmount) {
+                                createGradientBrush()
+                            } else {
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        GradientStart.copy(alpha = 0.3f),
+                                        GradientMiddle.copy(alpha = 0.3f),
+                                        GradientEnd.copy(alpha = 0.3f)
+                                    )
+                                )
+                            }
+                        )
+                        .clickable(enabled = isValidAmount) {
+                            /* Non-functional - demo only */
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Enter an amount",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        text = if (isValidAmount) {
+                            if (isWrapping) "Wrap" else "Unwrap"
+                        } else {
+                            "Enter an amount"
+                        },
+                        color = if (isValidAmount) Color.White else Color.White.copy(alpha = 0.5f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.SansSerif
                     )
                 }
             }

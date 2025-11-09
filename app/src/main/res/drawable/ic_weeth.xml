@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="30dp"
+    android:height="30dp"
+    android:viewportWidth="32"
+    android:viewportHeight="32">
+
+    <!-- Background gradient circle -->
+    <path android:pathData="M16,0 C24.837,0 32,7.163 32,16 C32,24.837 24.837,32 16,32 C7.163,32 0,24.837 0,16 C0,7.163 7.163,0 16,0Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="2.217"
+                android:startY="21.023"
+                android:endX="29.933"
+                android:endY="10.944"
+                android:type="linear">
+                <item android:offset="0" android:color="#FF29BCFA"/>
+                <item android:offset="0.43" android:color="#FF6464E4"/>
+                <item android:offset="1" android:color="#FFB45AFA"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Overlay gradient with opacity -->
+    <path
+        android:pathData="M16,0 C24.837,0 32,7.163 32,16 C32,24.837 24.837,32 16,32 C7.163,32 0,24.837 0,16 C0,7.163 7.163,0 16,0Z"
+        android:fillAlpha="0.66">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="17"
+                android:startY="-2"
+                android:endX="16"
+                android:endY="32"
+                android:type="linear">
+                <item android:offset="0" android:color="#0033117B"/>
+                <item android:offset="0.827" android:color="#FF33117B"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Main eETH icon path -->
+    <group android:translateX="8.531" android:translateY="4.047">
+        <path
+            android:fillColor="#D7CDFF"
+            android:fillType="evenOdd"
+            android:pathData="M14.912,19.109l0.003,0.04c0,0.109 -0.057,0.21 -0.143,0.26l-7.184,4.429c-0.098,0.06 -0.218,0.06 -0.316,0l-7.126,-4.374c-0.089,-0.055 -0.143,-0.153 -0.143,-0.286l-0.001,-0.029v-5.485c0,-0.202 0.216,-0.33 0.452,-0.28l7.003,4.064 6.937,-4.025 0.035,-0.018c0.235,-0.046 0.485,0.086 0.485,0.239l0.001,5.423zM0.605,18.673l2.07,-1.25 -2.07,-2.85zM3.03,17.913l-2.147,1.297 5.577,3.424zM8.496,22.571l5.538,-3.416 -2.14,-1.286zM12.248,17.378l2.064,1.241v-4.096zM7.305,18.058l-5.92,-3.436 6.071,8.357 6.015,-8.322 -5.863,3.401c-0.096,0.056 -0.207,0.056 -0.303,0zM0.293,12.218c0,-0.13 0.087,-0.244 0.292,-0.302V4.811c0,-0.018 0.003,-0.036 0.004,-0.052 0.02,-0.13 0.107,-0.24 0.14,-0.308L7.913,0.043c0.097,-0.057 0.217,-0.057 0.314,0l7.127,4.35c0.09,0.056 0.144,0.154 0.144,0.259v7.225c0,0.127 -0.078,0.236 -0.19,0.28l-7.122,3.918c-0.09,0.05 -0.2,0.05 -0.29,0zM0.603,5.242l0.001,5.716 2.562,-4.175zM14.311,5.188l-2.586,1.562 2.587,4.216zM11.41,6.236l2.622,-1.584 -5.748,-3.51zM6.586,1.208L0.883,4.705l2.599,1.563zM0.793,11.803l6.663,3.665 6.663,-3.665 -6.664,-10.86z"/>
+    </group>
+</vector>

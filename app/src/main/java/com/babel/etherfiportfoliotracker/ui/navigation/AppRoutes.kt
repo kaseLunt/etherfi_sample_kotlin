@@ -19,15 +19,19 @@ sealed class AppRoutes(val route: String) {
     /**
      * Wallet Main Screen - Main hub with bottom navigation for a specific address
      * @param address The wallet address (passed as navigation argument)
+     * @param nickname The wallet nickname (passed as navigation argument)
      */
-    data object WalletMain : AppRoutes("wallet_main/{address}") {
+    data object WalletMain : AppRoutes("wallet_main/{address}/{nickname}") {
         /**
-         * Builds the complete route with the address argument
+         * Builds the complete route with the address and nickname arguments
          * @param address The wallet address to navigate to
+         * @param nickname The wallet nickname to display
          * @return The complete route string
          */
-        fun buildRoute(address: String): String {
-            return "wallet_main/$address"
+        fun buildRoute(address: String, nickname: String): String {
+            // URL encode the nickname to handle special characters and spaces
+            val encodedNickname = java.net.URLEncoder.encode(nickname, "UTF-8")
+            return "wallet_main/$address/$encodedNickname"
         }
     }
 
