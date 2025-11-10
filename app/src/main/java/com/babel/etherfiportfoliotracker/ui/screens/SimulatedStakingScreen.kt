@@ -114,7 +114,7 @@ private fun StakingHeader(isStaking: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                width = 0.35.dp,
+                width = 0.5.dp,
                 brush = createGradientBrush(),
                 shape = RoundedCornerShape(12.dp)
             )

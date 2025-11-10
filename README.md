@@ -4,13 +4,17 @@ A native Android application for tracking Ether.fi portfolio balances, built wit
 
 ## 📸 Screenshots
 
-| My Wallets (List) | Add Wallet | Portfolio Detail |
-| :---: | :---: | :---: |
+|                  My Wallets (List)                  |                    Add Wallet                    |                   Portfolio Detail                    |
+|:---------------------------------------------------:|:------------------------------------------------:|:-----------------------------------------------------:|
 | ![Wallet List Screen](screenshots/wallets_list.png) | ![Add Wallet Screen](screenshots/add_wallet.png) | ![Portfolio Detail Screen](screenshots/portfolio.png) |
 
-| Stake / Wrap | Demo Card | |
-| :---: | :---: | :---: |
-| ![Stake and Wrap Demo](screenshots/stake_wrap.gif) | ![Demo Card View](screenshots/card_view.png) | |
+|                Stake UI                |               Wrap UI                |                  Demo Card                   |
+|:--------------------------------------:|:------------------------------------:|:--------------------------------------------:|
+| ![Stake Screen](screenshots/stake.png) | ![Wrap Screen](screenshots/wrap.png) | ![Demo Card View](screenshots/card_view.png) |
+
+|              Stake & Wrap (Animation)              |
+|:--------------------------------------------------:|
+| ![Stake and Wrap Demo](screenshots/stake_wrap.gif) |
 
 ## ✨ Features
 
