@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babel.etherfiportfoliotracker.BuildConfig
+import com.babel.etherfiportfoliotracker.network.CoinGeckoApiService
 import com.babel.etherfiportfoliotracker.network.EtherscanApiService
 import com.babel.etherfiportfoliotracker.utils.convertWeiToDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,11 +23,13 @@ import javax.inject.Inject
  * but doesn't perform actual staking operations.
  *
  * @property etherscanApi API service for fetching balances
+ * @property coinGeckoApi API service for fetching token prices
  * @property savedStateHandle Handle to navigation arguments
  */
-@HiltViewModel // <-- FIX: Removed (assistedFactory = ...)
+@HiltViewModel
 class SimulatedStakingViewModel @Inject constructor(
     private val etherscanApi: EtherscanApiService,
+    private val coinGeckoApi: CoinGeckoApiService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -35,13 +38,19 @@ class SimulatedStakingViewModel @Inject constructor(
     }
 
     // Contract address for eETH token
-    private val EETH_CONTRACT_ADDRESS = "0xFe2e637202056d30016725477c5da089Ab0A043A"
+    private val EETH_CONTRACT_ADDRESS = "0x35fa164735182de50811e8e2e824cfb9b6118ac2"
 
     private val _ethBalance = MutableStateFlow(0.0)
     val ethBalance: StateFlow<Double> = _ethBalance.asStateFlow()
 
     private val _eethBalance = MutableStateFlow(0.0)
     val eethBalance: StateFlow<Double> = _eethBalance.asStateFlow()
+
+    private val _ethPrice = MutableStateFlow(0.0)
+    val ethPrice: StateFlow<Double> = _ethPrice.asStateFlow()
+
+    private val _eethPrice = MutableStateFlow(0.0)
+    val eethPrice: StateFlow<Double> = _eethPrice.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -57,7 +66,7 @@ class SimulatedStakingViewModel @Inject constructor(
     }
 
     /**
-     * Loads ETH and eETH balances for the wallet address.
+     * Loads ETH and eETH balances and prices for the wallet address.
      * Uses the address passed via navigation argument.
      */
     private suspend fun loadBalances() {
@@ -88,8 +97,17 @@ class SimulatedStakingViewModel @Inject constructor(
                     )
                 }
 
+                // Fetch prices from CoinGecko
+                val pricesDeferred = async(Dispatchers.IO) {
+                    coinGeckoApi.getPrices(
+                        ids = "ethereum,ether-fi-staked-eth",
+                        vsCurrencies = "usd"
+                    )
+                }
+
                 val ethResponse = ethDeferred.await()
                 val eethResponse = eethDeferred.await()
+                val prices = pricesDeferred.await()
 
                 if (ethResponse.status == "1") {
                     _ethBalance.value = convertWeiToDecimal(ethResponse.result, 18)
@@ -102,6 +120,10 @@ class SimulatedStakingViewModel @Inject constructor(
                 } else {
                     throw Exception("Failed to fetch eETH balance: ${eethResponse.message}")
                 }
+
+                // Update prices
+                _ethPrice.value = prices["ethereum"]?.get("usd") ?: 0.0
+                _eethPrice.value = prices["ether-fi-staked-eth"]?.get("usd") ?: 0.0
             }
         } catch (e: Exception) {
             _errorMessage.value = "Error loading balances: ${e.localizedMessage}"

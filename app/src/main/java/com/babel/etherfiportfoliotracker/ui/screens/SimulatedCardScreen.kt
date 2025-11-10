@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.babel.etherfiportfoliotracker.R
+import com.babel.etherfiportfoliotracker.ui.theme.AppTheme
 
 // ============================================================================
 // FONTS
@@ -57,14 +57,6 @@ private val dmSansFont = FontFamily(
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-
-/**
- * Color constants used throughout the card screen
- */
-private object CardScreenColors {
-    val DarkBackground = Color(0xFF0a0a0d)
-    val DividerColor = Color(0xFF262628)
-}
 
 /**
  * Spacing and padding constants
@@ -207,10 +199,12 @@ private fun FeatureCard(
     description: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = CardScreenColors.DarkBackground
+            containerColor = colors.cardScreenBackground
         )
     ) {
         Column(
@@ -239,10 +233,12 @@ private fun FeatureCard(
  */
 @Composable
 private fun DisclaimerCard(modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = colors.cardScreenBackground
         )
     ) {
         Text(
@@ -262,12 +258,14 @@ private fun DisclaimerCard(modifier: Modifier = Modifier) {
  */
 @Composable
 private fun SectionDivider(modifier: Modifier = Modifier) {
+    val colors = AppTheme.colors
+
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(CardScreenSpacing.SectionSpacing))
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
             thickness = 1.dp,
-            color = CardScreenColors.DividerColor
+            color = colors.cardScreenDivider
         )
         Spacer(modifier = Modifier.height(CardScreenSpacing.SectionSpacing))
     }

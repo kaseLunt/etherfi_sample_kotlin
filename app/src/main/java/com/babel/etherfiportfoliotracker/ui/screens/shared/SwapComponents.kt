@@ -47,30 +47,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.babel.etherfiportfoliotracker.ui.theme.AppTheme
 import java.text.NumberFormat
 import java.util.Locale
 
 // ============================================================================
-// COLORS
+// FORMATTERS
 // ============================================================================
 
-internal val ScreenBackground = Color(0xFF1A1637)
-internal val CardBackground = Color(0xFF100A30)
-internal val HeaderBackground = Color(0xFF1A163A)
-internal val BoxBorderColor = Color(0xFF302659)
-internal val VioletCardBackground = Color(0xFF1A0F42)
-internal val LavenderText = Color(0xFFB8A9E8)
-internal val LavenderAccent = Color(0xFF8B7BC8)
-internal val ErrorColor = Color(0xFFCF6679)
-
-internal val GradientStart = Color(0xFF29BCFA)
-internal val GradientMiddle = Color(0xFF6464E4)
-internal val GradientEnd = Color(0xFFB45AFA)
-
-internal val InputGradientStart = Color(0xFF9F62F2)
-internal val InputGradientEnd = Color(0xFF5FEDEB)
-
-internal val PurpleArrow = Color(0xFFBA86FC)
+private val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US)
 
 // ============================================================================
 // CONSTANTS
@@ -141,34 +126,40 @@ internal fun createNumberFormatter(
     maximumFractionDigits = maxDecimals
 }
 
+@Composable
 internal fun createGradientBrush(): Brush {
+    val colors = AppTheme.colors
     return Brush.linearGradient(
         colorStops = arrayOf(
-            0.1423f to GradientStart,
-            0.4515f to GradientMiddle,
-            0.8614f to GradientEnd
+            0.1423f to colors.gradientStart,
+            0.4515f to colors.gradientMiddle,
+            0.8614f to colors.gradientEnd
         ),
         start = Offset(0f, 0f),
         end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.36f)
     )
 }
 
+@Composable
 internal fun createInputBoxGradientBrush(): Brush {
+    val colors = AppTheme.colors
     return Brush.linearGradient(
         colorStops = arrayOf(
-            -0.04f to InputGradientStart.copy(alpha = 0.16f),
-            1.2034f to InputGradientEnd.copy(alpha = 0f)
+            -0.04f to colors.inputGradientStart.copy(alpha = 0.16f),
+            1.2034f to colors.inputGradientEnd.copy(alpha = 0f)
         ),
         start = Offset(0f, 0f),
         end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY * 0.0175f)
     )
 }
 
+@Composable
 internal fun createDividerGradientBrush(): Brush {
+    val colors = AppTheme.colors
     return Brush.linearGradient(
         colorStops = arrayOf(
-            -0.04f to InputGradientStart.copy(alpha = 0.45f),
-            1.2034f to InputGradientEnd.copy(alpha = 0f)
+            -0.04f to colors.inputGradientStart.copy(alpha = 0.45f),
+            1.2034f to colors.inputGradientEnd.copy(alpha = 0f)
         ),
         start = Offset(0f, 0f),
         end = Offset(Float.POSITIVE_INFINITY, 0f)
@@ -205,14 +196,18 @@ private fun TokenInputBox(
     onMaxClick: () -> Unit,
     modifier: Modifier = Modifier,
     numberFormatter: NumberFormat,
-    iconRes: Int?
+    iconRes: Int?,
+    tokenPrice: Double
 ) {
+    val colors = AppTheme.colors
+    val usdValue = (value.toDoubleOrNull() ?: 0.0) * tokenPrice
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = BoxBorderColor,
+                color = colors.cardBorder,
                 shape = RoundedCornerShape(12.dp)
             )
             .background(
@@ -233,7 +228,7 @@ private fun TokenInputBox(
                     value = value,
                     onValueChange = onValueChange,
                     textStyle = TextStyle(
-                        color = LavenderText,
+                        color = colors.textLavender,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Normal
                     ),
@@ -244,7 +239,7 @@ private fun TokenInputBox(
                         if (value.isEmpty()) {
                             Text(
                                 "0",
-                                color = LavenderText.copy(alpha = SwapAlpha.VeryLight),
+                                color = colors.textLavender.copy(alpha = SwapAlpha.VeryLight),
                                 fontSize = 24.sp
                             )
                         }
@@ -258,7 +253,7 @@ private fun TokenInputBox(
                 ) {
                     Text(
                         "MAX",
-                        color = LavenderAccent,
+                        color = colors.textAccent,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -278,7 +273,7 @@ private fun TokenInputBox(
                     }
                     Text(
                         text = tokenSymbol,
-                        color = LavenderText,
+                        color = colors.textLavender,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -295,21 +290,21 @@ private fun TokenInputBox(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "$0.00",
-                    color = LavenderText.copy(alpha = SwapAlpha.Light),
+                    text = currencyFormatter.format(usdValue),
+                    color = colors.textLavender.copy(alpha = SwapAlpha.Light),
                     fontSize = 14.sp
                 )
 
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
-                        color = LavenderAccent,
+                        color = colors.textAccent,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Text(
                         text = "Balance ${numberFormatter.format(balance)}",
-                        color = LavenderText.copy(alpha = SwapAlpha.Light),
+                        color = colors.textLavender.copy(alpha = SwapAlpha.Light),
                         fontSize = 14.sp
                     )
                 }
@@ -325,14 +320,18 @@ private fun TokenDisplayBox(
     balance: Double,
     modifier: Modifier = Modifier,
     numberFormatter: NumberFormat,
-    iconRes: Int?
+    iconRes: Int?,
+    tokenPrice: Double
 ) {
+    val colors = AppTheme.colors
+    val usdValue = (value.toDoubleOrNull() ?: 0.0) * tokenPrice
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = BoxBorderColor,
+                color = colors.cardBorder,
                 shape = RoundedCornerShape(12.dp)
             )
             .background(
@@ -357,7 +356,7 @@ private fun TokenDisplayBox(
                             it
                         }
                     },
-                    color = LavenderText,
+                    color = colors.textLavender,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Normal
                 )
@@ -376,7 +375,7 @@ private fun TokenDisplayBox(
                     }
                     Text(
                         text = tokenSymbol,
-                        color = LavenderText,
+                        color = colors.textLavender,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -393,14 +392,14 @@ private fun TokenDisplayBox(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "$0.00",
-                    color = LavenderText.copy(alpha = SwapAlpha.Light),
+                    text = currencyFormatter.format(usdValue),
+                    color = colors.textLavender.copy(alpha = SwapAlpha.Light),
                     fontSize = 14.sp
                 )
 
                 Text(
                     text = "Balance ${numberFormatter.format(balance)}",
-                    color = LavenderText.copy(alpha = SwapAlpha.Light),
+                    color = colors.textLavender.copy(alpha = SwapAlpha.Light),
                     fontSize = 14.sp
                 )
             }
@@ -413,19 +412,20 @@ private fun SwapIcon(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     var isHovered by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
             .size(SwapSpacing.SwapIconSize)
             .clip(CircleShape)
-            .background(CardBackground)
+            .background(colors.cardBackground)
             .border(
                 width = 1.5.dp,
                 color = if (isHovered) {
-                    LavenderAccent.copy(alpha = SwapAlpha.Medium)
+                    colors.textAccent.copy(alpha = SwapAlpha.Medium)
                 } else {
-                    LavenderAccent.copy(alpha = SwapAlpha.SwapBorder)
+                    colors.textAccent.copy(alpha = SwapAlpha.SwapBorder)
                 },
                 shape = CircleShape
             )
@@ -447,7 +447,7 @@ private fun SwapIcon(
         Icon(
             painter = painterResource(id = com.babel.etherfiportfoliotracker.R.drawable.arrow_up_down_1),
             contentDescription = "Swap direction",
-            tint = if (isHovered) LavenderAccent else LavenderAccent.copy(alpha = 0.9f),
+            tint = if (isHovered) colors.textAccent else colors.textAccent.copy(alpha = 0.9f),
             modifier = Modifier.size(SwapSpacing.IconSize)
         )
     }
@@ -458,9 +458,10 @@ private fun SectionLabel(
     text: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     Text(
         text = text,
-        color = LavenderText.copy(alpha = SwapAlpha.Medium),
+        color = colors.textLavender.copy(alpha = SwapAlpha.Medium),
         fontSize = 14.sp,
         fontWeight = FontWeight.Medium,
         modifier = modifier
@@ -472,17 +473,18 @@ private fun DisclaimerCard(
     text: String,
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = VioletCardBackground.copy(alpha = SwapAlpha.Light)
+            containerColor = colors.cardBackgroundLight.copy(alpha = SwapAlpha.Light)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = LavenderText.copy(alpha = SwapAlpha.Medium),
+            color = colors.textLavender.copy(alpha = SwapAlpha.Medium),
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
             modifier = Modifier
@@ -512,11 +514,13 @@ internal fun SharedSwapUi(
     fromTokenSymbol: String,
     fromTokenBalance: Double,
     fromTokenIconRes: Int?,
+    fromTokenPrice: Double,
 
     // To token
     toTokenSymbol: String,
     toTokenBalance: Double,
     toTokenIconRes: Int?,
+    toTokenPrice: Double,
 
     // Labels
     headerContent: @Composable () -> Unit,
@@ -537,12 +541,13 @@ internal fun SharedSwapUi(
 
     modifier: Modifier = Modifier
 ) {
+    val colors = AppTheme.colors
     val numberFormatter = createNumberFormatter()
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(colors.appBackground)
             .verticalScroll(rememberScrollState())
             .padding(SwapSpacing.Medium)
     ) {
@@ -550,7 +555,7 @@ internal fun SharedSwapUi(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = CardBackground
+                containerColor = colors.cardBackground
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -574,7 +579,8 @@ internal fun SharedSwapUi(
                     isLoading = isLoading,
                     onMaxClick = onMaxClick,
                     numberFormatter = numberFormatter,
-                    iconRes = fromTokenIconRes
+                    iconRes = fromTokenIconRes,
+                    tokenPrice = fromTokenPrice
                 )
 
                 Spacer(modifier = Modifier.height(SwapSpacing.Large))
@@ -596,7 +602,8 @@ internal fun SharedSwapUi(
                     tokenSymbol = toTokenSymbol,
                     balance = toTokenBalance,
                     numberFormatter = numberFormatter,
-                    iconRes = toTokenIconRes
+                    iconRes = toTokenIconRes,
+                    tokenPrice = toTokenPrice
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -618,9 +625,9 @@ internal fun SharedSwapUi(
                             } else {
                                 Brush.linearGradient(
                                     colors = listOf(
-                                        GradientStart.copy(alpha = 0.3f),
-                                        GradientMiddle.copy(alpha = 0.3f),
-                                        GradientEnd.copy(alpha = 0.3f)
+                                        colors.gradientStart.copy(alpha = 0.3f),
+                                        colors.gradientMiddle.copy(alpha = 0.3f),
+                                        colors.gradientEnd.copy(alpha = 0.3f)
                                     )
                                 )
                             }
@@ -649,7 +656,7 @@ internal fun SharedSwapUi(
             Spacer(modifier = Modifier.height(SwapSpacing.Small))
             Text(
                 text = error,
-                color = ErrorColor,
+                color = MaterialTheme.colorScheme.error,
                 fontSize = 14.sp,
                 modifier = Modifier.fillMaxWidth()
             )

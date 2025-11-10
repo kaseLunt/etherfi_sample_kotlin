@@ -18,23 +18,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.babel.etherfiportfoliotracker.R
-import com.babel.etherfiportfoliotracker.ui.screens.shared.HeaderBackground
-import com.babel.etherfiportfoliotracker.ui.screens.shared.LavenderText
-import com.babel.etherfiportfoliotracker.ui.screens.shared.PurpleArrow
 import com.babel.etherfiportfoliotracker.ui.screens.shared.SharedSwapUi
 import com.babel.etherfiportfoliotracker.ui.screens.shared.SwapSpacing
 import com.babel.etherfiportfoliotracker.ui.screens.shared.createGradientBrush
 import com.babel.etherfiportfoliotracker.ui.screens.shared.formatToMaxDigits
 import com.babel.etherfiportfoliotracker.ui.screens.shared.isValidAmount
 import com.babel.etherfiportfoliotracker.ui.screens.shared.limitToMaxDigits
+import com.babel.etherfiportfoliotracker.ui.theme.AppTheme
 import com.babel.etherfiportfoliotracker.ui.viewmodels.SimulatedStakingViewModel
-import androidx.compose.ui.graphics.Color
 
 /**
  * Staking content that shows real balances but doesn't perform actual staking.
@@ -52,11 +50,15 @@ fun StakingContent(
     var isStaking by remember { mutableStateOf(true) }
     var stakeAmount by remember { mutableStateOf("") }
 
-    // ViewModel state
+    // ViewModel state - balances
     val ethBalance by viewModel.ethBalance.collectAsState()
     val eethBalance by viewModel.eethBalance.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // ViewModel state - prices
+    val ethPrice by viewModel.ethPrice.collectAsState()
+    val eethPrice by viewModel.eethPrice.collectAsState()
 
     // Current balances based on direction
     val currentBalance = if (isStaking) ethBalance else eethBalance
@@ -69,9 +71,11 @@ fun StakingContent(
         fromTokenSymbol = if (isStaking) "ETH" else "eETH",
         fromTokenBalance = if (isStaking) ethBalance else eethBalance,
         fromTokenIconRes = if (isStaking) R.drawable.ic_eth else R.drawable.ic_eeth,
+        fromTokenPrice = if (isStaking) ethPrice else eethPrice,
         toTokenSymbol = if (isStaking) "eETH" else "ETH",
         toTokenBalance = if (isStaking) eethBalance else ethBalance,
         toTokenIconRes = if (isStaking) R.drawable.ic_eeth else R.drawable.ic_eth,
+        toTokenPrice = if (isStaking) eethPrice else ethPrice,
         headerContent = {
             StakingHeader(isStaking = isStaking)
         },
@@ -104,6 +108,8 @@ fun StakingContent(
 
 @Composable
 private fun StakingHeader(isStaking: Boolean) {
+    val colors = AppTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,7 +118,7 @@ private fun StakingHeader(isStaking: Boolean) {
                 brush = createGradientBrush(),
                 shape = RoundedCornerShape(12.dp)
             )
-            .background(HeaderBackground, RoundedCornerShape(12.dp))
+            .background(colors.cardBackground, RoundedCornerShape(12.dp))
             .padding(SwapSpacing.Small),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -120,7 +126,7 @@ private fun StakingHeader(isStaking: Boolean) {
         if (isStaking) {
             Text(
                 text = "Stake on ",
-                color = PurpleArrow,
+                color = colors.purpleArrow,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 fontFamily = FontFamily.SansSerif
@@ -135,7 +141,7 @@ private fun StakingHeader(isStaking: Boolean) {
             )
             Text(
                 text = "Ethereum",
-                color = LavenderText,
+                color = colors.textLavender,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 fontFamily = FontFamily.SansSerif
@@ -143,7 +149,7 @@ private fun StakingHeader(isStaking: Boolean) {
         } else {
             Text(
                 text = "Unstake on ",
-                color = PurpleArrow,
+                color = colors.purpleArrow,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 fontFamily = FontFamily.SansSerif
@@ -158,7 +164,7 @@ private fun StakingHeader(isStaking: Boolean) {
             )
             Text(
                 text = "Ethereum",
-                color = LavenderText,
+                color = colors.textLavender,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 fontFamily = FontFamily.SansSerif
@@ -169,6 +175,8 @@ private fun StakingHeader(isStaking: Boolean) {
 
 @Composable
 private fun StakingExchangeRate() {
+    val colors = AppTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,12 +185,12 @@ private fun StakingExchangeRate() {
     ) {
         Text(
             text = "Exchange Rate",
-            color = LavenderText.copy(alpha = 0.6f),
+            color = colors.textLavender.copy(alpha = 0.6f),
             fontSize = 14.sp
         )
         Text(
             text = "1 ETH = 1.0 eETH",
-            color = LavenderText,
+            color = colors.textLavender,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )

@@ -25,15 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.babel.etherfiportfoliotracker.R
-import com.babel.etherfiportfoliotracker.ui.screens.shared.HeaderBackground
-import com.babel.etherfiportfoliotracker.ui.screens.shared.LavenderText
-import com.babel.etherfiportfoliotracker.ui.screens.shared.PurpleArrow
 import com.babel.etherfiportfoliotracker.ui.screens.shared.SharedSwapUi
 import com.babel.etherfiportfoliotracker.ui.screens.shared.SwapSpacing
 import com.babel.etherfiportfoliotracker.ui.screens.shared.createGradientBrush
 import com.babel.etherfiportfoliotracker.ui.screens.shared.formatToMaxDigits
 import com.babel.etherfiportfoliotracker.ui.screens.shared.isValidAmount
 import com.babel.etherfiportfoliotracker.ui.screens.shared.limitToMaxDigits
+import com.babel.etherfiportfoliotracker.ui.theme.AppTheme
 import com.babel.etherfiportfoliotracker.ui.viewmodels.SimulatedWrapViewModel
 
 /**
@@ -52,11 +50,15 @@ fun WrapContent(
     var isWrapping by remember { mutableStateOf(true) }
     var wrapAmount by remember { mutableStateOf("") }
 
-    // ViewModel state
+    // ViewModel state - balances
     val eethBalance by viewModel.eethBalance.collectAsState()
     val weethBalance by viewModel.weethBalance.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // ViewModel state - prices
+    val eethPrice by viewModel.eethPrice.collectAsState()
+    val weethPrice by viewModel.weethPrice.collectAsState()
 
     // Current balances based on direction
     val currentBalance = if (isWrapping) eethBalance else weethBalance
@@ -69,9 +71,11 @@ fun WrapContent(
         fromTokenSymbol = if (isWrapping) "eETH" else "weETH",
         fromTokenBalance = if (isWrapping) eethBalance else weethBalance,
         fromTokenIconRes = if (isWrapping) R.drawable.ic_eeth else R.drawable.ic_weeth,
+        fromTokenPrice = if (isWrapping) eethPrice else weethPrice,
         toTokenSymbol = if (isWrapping) "weETH" else "eETH",
         toTokenBalance = if (isWrapping) weethBalance else eethBalance,
         toTokenIconRes = if (isWrapping) R.drawable.ic_weeth else R.drawable.ic_eeth,
+        toTokenPrice = if (isWrapping) weethPrice else eethPrice,
         headerContent = {
             WrapHeader()
         },
@@ -104,6 +108,8 @@ fun WrapContent(
 
 @Composable
 private fun WrapHeader() {
+    val colors = AppTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,14 +118,14 @@ private fun WrapHeader() {
                 brush = createGradientBrush(),
                 shape = RoundedCornerShape(12.dp)
             )
-            .background(HeaderBackground, RoundedCornerShape(12.dp))
+            .background(colors.cardBackground, RoundedCornerShape(12.dp))
             .padding(SwapSpacing.Small),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Wrap on ",
-            color = PurpleArrow,
+            color = colors.purpleArrow,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.SansSerif
@@ -134,7 +140,7 @@ private fun WrapHeader() {
         )
         Text(
             text = "Ethereum",
-            color = LavenderText,
+            color = colors.textLavender,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily.SansSerif
@@ -144,6 +150,8 @@ private fun WrapHeader() {
 
 @Composable
 private fun WrapExchangeRate(isWrapping: Boolean) {
+    val colors = AppTheme.colors
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -152,12 +160,12 @@ private fun WrapExchangeRate(isWrapping: Boolean) {
     ) {
         Text(
             text = "Exchange Rate",
-            color = LavenderText.copy(alpha = 0.6f),
+            color = colors.textLavender.copy(alpha = 0.6f),
             fontSize = 14.sp
         )
         Text(
             text = if (isWrapping) "1 eETH = 1.0 weETH" else "1 weETH = 1.0 eETH",
-            color = LavenderText,
+            color = colors.textLavender,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )

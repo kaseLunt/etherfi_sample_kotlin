@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.babel.etherfiportfoliotracker.BuildConfig
+import com.babel.etherfiportfoliotracker.network.CoinGeckoApiService
 import com.babel.etherfiportfoliotracker.network.EtherscanApiService
 import com.babel.etherfiportfoliotracker.utils.convertWeiToDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,11 +23,13 @@ import javax.inject.Inject
  * but doesn't perform actual wrapping operations.
  *
  * @property etherscanApi API service for fetching balances
+ * @property coinGeckoApi API service for fetching token prices
  * @property savedStateHandle State handle containing navigation arguments
  */
 @HiltViewModel
 class SimulatedWrapViewModel @Inject constructor(
     private val etherscanApi: EtherscanApiService,
+    private val coinGeckoApi: CoinGeckoApiService,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -36,14 +39,20 @@ class SimulatedWrapViewModel @Inject constructor(
     }
 
     // Contract addresses
-    private val EETH_CONTRACT_ADDRESS = "0xFe2e637202056d30016725477c5da089Ab0A043A"
-    private val WEETH_CONTRACT_ADDRESS = "0x35fA164735182de50811E8e2E824cFb9B6118ac2"
+    private val EETH_CONTRACT_ADDRESS = "0x35fA164735182de50811E8e2E824cFb9B6118ac2"
+    private val WEETH_CONTRACT_ADDRESS = "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
 
     private val _eethBalance = MutableStateFlow(0.0)
     val eethBalance: StateFlow<Double> = _eethBalance.asStateFlow()
 
     private val _weethBalance = MutableStateFlow(0.0)
     val weethBalance: StateFlow<Double> = _weethBalance.asStateFlow()
+
+    private val _eethPrice = MutableStateFlow(0.0)
+    val eethPrice: StateFlow<Double> = _eethPrice.asStateFlow()
+
+    private val _weethPrice = MutableStateFlow(0.0)
+    val weethPrice: StateFlow<Double> = _weethPrice.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -59,7 +68,7 @@ class SimulatedWrapViewModel @Inject constructor(
     }
 
     /**
-     * Loads eETH and weETH balances for the wallet address.
+     * Loads eETH and weETH balances and prices for the wallet address.
      */
     private suspend fun loadBalances() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -91,8 +100,17 @@ class SimulatedWrapViewModel @Inject constructor(
                         )
                     }
 
+                    // Fetch prices from CoinGecko
+                    val pricesDeferred = async {
+                        coinGeckoApi.getPrices(
+                            ids = "ether-fi-staked-eth,wrapped-eeth",
+                            vsCurrencies = "usd"
+                        )
+                    }
+
                     val eethResponse = eethDeferred.await()
                     val weethResponse = weethDeferred.await()
+                    val prices = pricesDeferred.await()
 
                     if (eethResponse.status == "1") {
                         _eethBalance.value = convertWeiToDecimal(eethResponse.result, 18)
@@ -105,6 +123,10 @@ class SimulatedWrapViewModel @Inject constructor(
                     } else {
                         throw Exception("Failed to fetch weETH balance: ${weethResponse.message}")
                     }
+
+                    // Update prices
+                    _eethPrice.value = prices["ether-fi-staked-eth"]?.get("usd") ?: 0.0
+                    _weethPrice.value = prices["wrapped-eeth"]?.get("usd") ?: 0.0
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error loading balances: ${e.localizedMessage}"

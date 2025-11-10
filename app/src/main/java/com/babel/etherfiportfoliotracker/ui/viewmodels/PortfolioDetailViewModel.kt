@@ -76,14 +76,14 @@ class PortfolioDetailViewModel @Inject constructor(
         TokenInfo(
             name = "weETH (Wrapped Ether.fi)",
             symbol = "weETH",
-            contractAddress = "0x35fA164735182de50811E8e2E824cFb9B6118ac2",
+            contractAddress = "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
             coingeckoId = "ether-fi-staked-eth",
             decimals = 18
         ),
         TokenInfo(
             name = "eETH (Ether.fi ETH)",
             symbol = "eETH",
-            contractAddress = "0xFe2e637202056d30016725477c5da089Ab0A043A",
+            contractAddress = "0x35fA164735182de50811E8e2E824cFb9B6118ac2",
             coingeckoId = "ether-fi",
             decimals = 18
         )

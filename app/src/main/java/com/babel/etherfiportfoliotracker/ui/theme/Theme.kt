@@ -8,6 +8,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 /**
@@ -52,11 +55,49 @@ private val EtherFiColorScheme = darkColorScheme(
     outlineVariant = EtherFiGoldDark,
 )
 
+// Define custom color properties
+data class CustomColors(
+    val appBackground: Color = Color.Unspecified,
+    val cardBackground: Color = Color.Unspecified,
+    val cardBackgroundLight: Color = Color.Unspecified,
+    val cardBorder: Color = Color.Unspecified,
+    val textLavender: Color = Color.Unspecified,
+    val textAccent: Color = Color.Unspecified,
+    val purpleArrow: Color = Color.Unspecified,
+    val gradientStart: Color = Color.Unspecified,
+    val gradientMiddle: Color = Color.Unspecified,
+    val gradientEnd: Color = Color.Unspecified,
+    val inputGradientStart: Color = Color.Unspecified,
+    val inputGradientEnd: Color = Color.Unspecified,
+    val cardScreenBackground: Color = Color.Unspecified,
+    val cardScreenDivider: Color = Color.Unspecified
+)
+
+// Create the specific dark theme colors
+private val DarkCustomColors = CustomColors(
+    appBackground = AppBrandPurpleDark,
+    cardBackground = AppBrandPurpleMedium,
+    cardBackgroundLight = AppBrandPurpleLight,
+    cardBorder = AppBrandPurpleBorder,
+    textLavender = AppBrandLavenderText,
+    textAccent = AppBrandLavenderAccent,
+    purpleArrow = AppBrandPurpleArrow,
+    gradientStart = AppBrandGradientStart,
+    gradientMiddle = AppBrandGradientMiddle,
+    gradientEnd = AppBrandGradientEnd,
+    inputGradientStart = AppBrandInputGradientStart,
+    inputGradientEnd = AppBrandInputGradientEnd,
+    cardScreenBackground = CardScreenDarkBackground,
+    cardScreenDivider = CardScreenDivider
+)
+
+// Create a CompositionLocal
+internal val LocalCustomColors = staticCompositionLocalOf { CustomColors() }
+
 @Composable
 fun EtherFiPortfolioTrackerTheme(
-    darkTheme: Boolean = true, // Always use dark theme to match EtherFi
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false, // Disable to use our custom colors
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -64,12 +105,24 @@ fun EtherFiPortfolioTrackerTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        else -> EtherFiColorScheme // Always use our custom EtherFi theme
+        else -> EtherFiColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    val customColors = DarkCustomColors
+
+    CompositionLocalProvider(
+        LocalCustomColors provides customColors
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
+}
+
+object AppTheme {
+    val colors: CustomColors
+        @Composable
+        get() = LocalCustomColors.current
 }

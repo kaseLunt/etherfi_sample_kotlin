@@ -109,7 +109,12 @@ fun AddressListScreen(
                 // List of wallets
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        top = 16.dp,
+                        bottom = 80.dp
+                    )
+
                 ) {
                     items(wallets) { wallet ->
                         Card(

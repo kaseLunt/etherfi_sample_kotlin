@@ -1,5 +1,9 @@
 package com.babel.etherfiportfoliotracker.ui.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -63,7 +67,16 @@ fun AddAddressScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Wallet Address") }
+                title = { Text("Add Wallet Address") },
+                // ▼▼▼ ADD THIS BLOCK ▼▼▼
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
