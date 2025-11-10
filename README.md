@@ -36,13 +36,13 @@ This project is built using a modern, scalable, and testable architecture. It fo
 * **Networking:** Uses **Retrofit** for type-safe network requests to the Etherscan and CoinGecko APIs.
 * **JSON Parsing:** Uses **Kotlinx.Serialization** for efficient, reflection-free JSON parsing.
 * **Navigation:** Uses **Jetpack Navigation for Compose** to manage app flow, including a nested navigation graph for the main tabbed interface.
-* **Data Persistence:** (Assumed) Uses **Room** to provide a `WalletDao` for saving and retrieving user-added wallets.
+* **Data Persistence:** Uses **Room** to provide a `WalletDao` for saving and retrieving user-added wallets.
 
 ## 🚀 How to Build
 
 ### Prerequisites
 
-* Android Studio (latest stable version)
+* Android Studio
 * JDK 17 or higher
 
 ### Building
