@@ -49,7 +49,7 @@ This project is built using a modern, scalable, and testable architecture. It fo
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/kaseLunt/etherfi_sample_kotlin.git](https://github.com/kaseLunt/etherfi_sample_kotlin.git)
+    git clone https://github.com/kaseLunt/etherfi_sample_kotlin.git
     ```
 2.  **Get API Keys:**
     This project requires an API key from **Etherscan** to fetch wallet balances.
