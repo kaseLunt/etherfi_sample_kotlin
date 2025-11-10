@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.babel.etherfiportfoliotracker.ui.navigation.BottomNavItem
+import com.babel.etherfiportfoliotracker.ui.screens.DemoCardTabContent
 
 /**
  * Main wallet screen that hosts the bottom navigation bar.
@@ -105,9 +106,21 @@ fun WalletMainScreen(
         // Nested NavHost for bottom navigation content
         NavHost(
             navController = nestedNavController,
-            startDestination = BottomNavItem.Portfolio.buildRoute(address),
+            startDestination = BottomNavItem.DemoCard.buildRoute(address),
             modifier = Modifier.padding(paddingValues)
         ) {
+            composable(
+                route = BottomNavItem.DemoCard.route,
+                arguments = listOf(
+                    navArgument("address") {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+                // This composable doesn't need the address, just renders static content.
+                DemoCardTabContent()
+            }
+
             composable(
                 route = BottomNavItem.Portfolio.route,
                 arguments = listOf(

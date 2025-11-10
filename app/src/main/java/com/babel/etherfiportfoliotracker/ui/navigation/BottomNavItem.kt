@@ -2,6 +2,7 @@ package com.babel.etherfiportfoliotracker.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,10 +56,21 @@ sealed class BottomNavItem(
         override fun buildRoute(address: String): String = "stake_wrap/$address"
     }
 
+    /**
+     * Demo Card section - displays simulated card
+     */
+    data object DemoCard : BottomNavItem(
+        route = "card/{address}",
+        title = "Card",
+        icon = Icons.Default.CreditCard
+    ) {
+        override fun buildRoute(address: String): String = "card/$address"
+    }
+
     companion object {
         /**
          * Returns all bottom navigation items in order
          */
-        fun getAllItems(): List<BottomNavItem> = listOf(Portfolio, Vault, StakeWrap)
+        fun getAllItems(): List<BottomNavItem> = listOf(DemoCard, StakeWrap, Portfolio, Vault)
     }
 }

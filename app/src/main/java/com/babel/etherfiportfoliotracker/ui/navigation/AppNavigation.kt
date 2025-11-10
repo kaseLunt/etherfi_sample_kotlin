@@ -8,7 +8,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.babel.etherfiportfoliotracker.ui.screens.AddAddressScreen
 import com.babel.etherfiportfoliotracker.ui.screens.AddressListScreen
-import com.babel.etherfiportfoliotracker.ui.screens.SimulatedCardScreen
 import com.babel.etherfiportfoliotracker.ui.screens.WalletMainScreen
 import java.net.URLDecoder
 
@@ -55,11 +54,6 @@ fun AppNavigation() {
                 nickname = nickname,
                 navController = navController
             )
-        }
-
-        // Simulated Card Screen
-        composable(route = AppRoutes.SimulatedCard.route) {
-            SimulatedCardScreen(navController = navController)
         }
     }
 }

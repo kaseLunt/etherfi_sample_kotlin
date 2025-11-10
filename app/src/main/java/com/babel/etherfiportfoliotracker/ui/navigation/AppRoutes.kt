@@ -34,9 +34,4 @@ sealed class AppRoutes(val route: String) {
             return "wallet_main/$address/$encodedNickname"
         }
     }
-
-    /**
-     * Simulated Card Screen - Shows card simulation
-     */
-    data object SimulatedCard : AppRoutes("card")
 }

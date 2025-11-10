@@ -10,19 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +30,6 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.babel.etherfiportfoliotracker.R
 
@@ -282,69 +274,40 @@ private fun SectionDivider(modifier: Modifier = Modifier) {
 }
 
 // ============================================================================
-// MAIN SCREEN
+// MAIN TAB CONTENT
 // ============================================================================
 
 /**
- * Simulated card screen for demo purposes.
- * This screen is non-functional and serves as a UI mockup for the EtherFi Cash Card.
- *
- * @param navController Navigation controller for navigating between screens
+ * Demo card tab content for display within a tabbed interface.
+ * This content is non-functional and serves as a UI mockup for the EtherFi Cash Card.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimulatedCardScreen(navController: NavController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "ether.fi Card",
-                        style = TextStyle(
-                            fontFamily = crimsonProFont,
-                            fontSize = 28.sp,
-                            fontFeatureSettings = FONT_FEATURE_SETTINGS
-                        )
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                }
+fun DemoCardTabContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Header Section
+        CardHeaderSection(
+            onGetCardClick = { /* Non-functional - demo only */ }
+        )
+
+        // Divider
+        SectionDivider()
+
+        // Feature Cards
+        cardFeatures.forEach { feature ->
+            FeatureCard(
+                title = feature.title,
+                description = feature.description
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Header Section
-            CardHeaderSection(
-                onGetCardClick = { /* Non-functional - demo only */ }
-            )
 
-            // Divider
-            SectionDivider()
-
-            // Feature Cards
-            cardFeatures.forEach { feature ->
-                FeatureCard(
-                    title = feature.title,
-                    description = feature.description
-                )
-            }
-
-            // Disclaimer
-            DisclaimerCard()
-        }
+        // Disclaimer
+        DisclaimerCard()
     }
 }
