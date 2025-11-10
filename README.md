@@ -24,7 +24,6 @@ A native Android application for tracking Ether.fi portfolio balances, built wit
 * **Simulated Actions:**
     * **Staking Interface:** A UI simulating the staking of ETH for eETH.
     * **Wrapping Interface:** A UI simulating the wrapping of eETH for weETH.
-* **Demo Content:** Includes a "Demo Card" tab showcasing a potential future product UI.
 
 ## 🏛️ Architecture & Tech Stack
 
@@ -70,7 +69,7 @@ This project is built using a modern, scalable, and testable architecture. It fo
 4.  **Build and Run:**
     * Open the project in Android Studio.
     * Let Gradle sync.
-    * Run the app on an emulator or physical device.
+    * Run the app on an emulator or physical device (easiest to use the emulator built in to Android Studio)
 
 ## 📈 Future Improvements
 
