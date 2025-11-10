@@ -24,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.babel.etherfiportfoliotracker.R
-import com.babel.etherfiportfoliotracker.ui.screens.shared.CardBackground
 import com.babel.etherfiportfoliotracker.ui.screens.shared.HeaderBackground
 import com.babel.etherfiportfoliotracker.ui.screens.shared.LavenderText
 import com.babel.etherfiportfoliotracker.ui.screens.shared.PurpleArrow
